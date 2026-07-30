@@ -332,6 +332,11 @@
       </div>
       <div class="hint">± buttons step by 1 day; type directly for half days (e.g. 1.5)</div>
     </div>
+    <div class="field">
+      <label for="daysWorked">Days Worked</label>
+      <input type="number" id="daysWorked" min="0" step="0.5" inputmode="decimal">
+      <div class="hint">Shared by both cards below</div>
+    </div>
   </div>
 
   <div class="summary-bar" id="summaryBar"></div>
@@ -340,19 +345,13 @@
     <div class="card">
       <h2>Logged-In Time</h2>
       <div class="goal-tag">Goal: 5.5 hrs/day average</div>
-      <div class="row2">
-        <div class="field">
-          <label for="daysWorkedHours">Days Worked</label>
-          <input type="number" id="daysWorkedHours" min="0" step="0.5">
-        </div>
-        <div class="field">
-          <label for="avgHours">Current Avg Time (per day)</label>
-          <div class="time-duration">
-            <input type="number" id="avgHours" min="0" max="24" step="1" placeholder="Hrs" inputmode="decimal">
-            <span>hrs</span>
-            <input type="number" id="avgMinutes" min="0" max="59" step="1" placeholder="Min" inputmode="decimal">
-            <span>min</span>
-          </div>
+      <div class="field">
+        <label for="avgHours">Current Avg Time (per day)</label>
+        <div class="time-duration">
+          <input type="number" id="avgHours" min="0" max="24" step="1" placeholder="Hrs" inputmode="decimal">
+          <span>hrs</span>
+          <input type="number" id="avgMinutes" min="0" max="59" step="1" placeholder="Min" inputmode="decimal">
+          <span>min</span>
         </div>
       </div>
       <div class="result gray" id="hoursResult">
@@ -367,15 +366,9 @@
     <div class="card">
       <h2>Answer Rate</h2>
       <div class="goal-tag">Goal: 85% average</div>
-      <div class="row2">
-        <div class="field">
-          <label for="daysWorkedRate">Days Worked</label>
-          <input type="number" id="daysWorkedRate" min="0" step="0.5">
-        </div>
-        <div class="field">
-          <label for="avgRate">Current Avg Rate (%)</label>
-          <input type="number" id="avgRate" min="0" max="100" step="0.01">
-        </div>
+      <div class="field">
+        <label for="avgRate">Current Avg Rate (%)</label>
+        <input type="number" id="avgRate" min="0" max="100" step="0.01">
       </div>
       <div class="result gray" id="rateResult">
         <div class="big" id="rateBig">–</div>
@@ -503,13 +496,11 @@ let state = {
   month: today.getMonth(),
   year: thisYear,
   vacationDays: 0,
-  daysWorkedHours: null,   // null = "auto" not yet overridden
-  daysWorkedRate: null,
+  daysWorked: null,   // null = "auto" not yet overridden
   avgHours: "",
   avgMinutes: "",
   avgRate: "",
-  overrideHours: false,
-  overrideRate: false,
+  overrideDaysWorked: false,
 };
 
 function loadState(){
@@ -600,25 +591,15 @@ function render(){
   const rawWorkingDays = networkDays(start, end, holidays);
   const adjWorkingDays = Math.max(0, rawWorkingDays - state.vacationDays);
 
-  // Days worked (hours card)
-  const autoHours = autoDaysWorked(year, monthIndex, holidays, adjWorkingDays);
-  const daysWorkedHoursInput = document.getElementById("daysWorkedHours");
-  if(!state.overrideHours){
-    const autoValHours = Math.min(autoHours, adjWorkingDays);
-    state.daysWorkedHours = autoValHours;
-    if(document.activeElement !== daysWorkedHoursInput) daysWorkedHoursInput.value = autoValHours;
+  // Days worked (shared by both cards)
+  const autoWorked = autoDaysWorked(year, monthIndex, holidays, adjWorkingDays);
+  const daysWorkedInput = document.getElementById("daysWorked");
+  if(!state.overrideDaysWorked){
+    const autoVal = Math.min(autoWorked, adjWorkingDays);
+    state.daysWorked = autoVal;
+    if(document.activeElement !== daysWorkedInput) daysWorkedInput.value = autoVal;
   } else {
-    if(document.activeElement !== daysWorkedHoursInput) daysWorkedHoursInput.value = state.daysWorkedHours;
-  }
-
-  // Days worked (rate card)
-  const daysWorkedRateInput = document.getElementById("daysWorkedRate");
-  if(!state.overrideRate){
-    const autoValRate = Math.min(autoHours, adjWorkingDays);
-    state.daysWorkedRate = autoValRate;
-    if(document.activeElement !== daysWorkedRateInput) daysWorkedRateInput.value = autoValRate;
-  } else {
-    if(document.activeElement !== daysWorkedRateInput) daysWorkedRateInput.value = state.daysWorkedRate;
+    if(document.activeElement !== daysWorkedInput) daysWorkedInput.value = state.daysWorked;
   }
 
   const avgHoursEl = document.getElementById("avgHours");
@@ -641,12 +622,12 @@ function render(){
   document.getElementById("rateWorkingDays").textContent = adjWorkingDays;
 
   const currentAvgHours = hoursMinutesToDecimal(state.avgHours, state.avgMinutes);
-  const hoursResult = requiredAverage(HOURS_GOAL, adjWorkingDays, currentAvgHours, Number(state.daysWorkedHours) || 0);
+  const hoursResult = requiredAverage(HOURS_GOAL, adjWorkingDays, currentAvgHours, Number(state.daysWorked) || 0);
   document.getElementById("hoursDaysRemaining").textContent = hoursResult.ok ? hoursResult.remaining : 0;
   setResult("hours", hoursResult, HOURS_GOAL, v => `${decimalToTimeString(v)} (${v.toFixed(2)} hrs)`);
 
   const currentAvgRate = (Number(state.avgRate) || 0) / 100;
-  const rateResult = requiredAverage(RATE_GOAL, adjWorkingDays, currentAvgRate, Number(state.daysWorkedRate) || 0);
+  const rateResult = requiredAverage(RATE_GOAL, adjWorkingDays, currentAvgRate, Number(state.daysWorked) || 0);
   document.getElementById("rateDaysRemaining").textContent = rateResult.ok ? rateResult.remaining : 0;
   setResult("rate", rateResult, RATE_GOAL, v => `${(v * 100).toFixed(2)}%`);
 
@@ -656,14 +637,12 @@ function render(){
 /* ---------- Event wiring ---------- */
 monthSelect.addEventListener("change", () => {
   state.month = Number(monthSelect.value);
-  state.overrideHours = false;
-  state.overrideRate = false;
+  state.overrideDaysWorked = false;
   render();
 });
 yearSelect.addEventListener("change", () => {
   state.year = Number(yearSelect.value);
-  state.overrideHours = false;
-  state.overrideRate = false;
+  state.overrideDaysWorked = false;
   render();
 });
 vacUp.addEventListener("click", () => {
@@ -681,14 +660,9 @@ document.getElementById("vacVal").addEventListener("input", (e) => {
   state.vacationDays = v;
   render();
 });
-document.getElementById("daysWorkedHours").addEventListener("input", (e) => {
-  state.overrideHours = true;
-  state.daysWorkedHours = Number(e.target.value) || 0;
-  render();
-});
-document.getElementById("daysWorkedRate").addEventListener("input", (e) => {
-  state.overrideRate = true;
-  state.daysWorkedRate = Number(e.target.value) || 0;
+document.getElementById("daysWorked").addEventListener("input", (e) => {
+  state.overrideDaysWorked = true;
+  state.daysWorked = Number(e.target.value) || 0;
   render();
 });
 document.getElementById("avgHours").addEventListener("input", (e) => {
