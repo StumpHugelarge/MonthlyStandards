@@ -243,6 +243,68 @@
     margin-top: 32px;
   }
   a.install-hint{ color: var(--accent); text-decoration:none; font-weight:600; }
+
+  .disclaimer-row{
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+  }
+  .disclaimer-btn{
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 16px;
+    cursor: pointer;
+  }
+  .disclaimer-btn:hover{
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(20,20,43,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+  .modal-overlay[hidden]{ display: none; }
+  .modal-box{
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 420px;
+    width: 100%;
+    padding: 24px;
+  }
+  .modal-box h3{
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .modal-box p{
+    margin: 0 0 20px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+  .modal-close{
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 9px 18px;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -327,7 +389,18 @@
 
   <footer>
     Holidays observed: New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas Day (weekdays only — no weekend shifting).
+    <div class="disclaimer-row">
+      <button id="disclaimerBtn" class="disclaimer-btn" type="button">Disclaimer</button>
+    </div>
   </footer>
+</div>
+
+<div class="modal-overlay" id="disclaimerOverlay" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
+    <h3 id="disclaimerTitle">Disclaimer</h3>
+    <p>Alan is a human and humans make mistakes. He is not a coder or a math person. The formulas and calculations contained in this app were created to the best of his meager abilities. Alan cannot be held responsible for any standards violations resulting from the use of this app.</p>
+    <button id="disclaimerClose" class="modal-close" type="button">Close</button>
+  </div>
 </div>
 
 <script>
@@ -635,6 +708,28 @@ document.getElementById("avgRate").addEventListener("input", (e) => {
 
 loadState();
 render();
+
+/* ---------- Disclaimer modal ---------- */
+const disclaimerBtn = document.getElementById("disclaimerBtn");
+const disclaimerOverlay = document.getElementById("disclaimerOverlay");
+const disclaimerClose = document.getElementById("disclaimerClose");
+
+function openDisclaimer(){
+  disclaimerOverlay.hidden = false;
+  disclaimerClose.focus();
+}
+function closeDisclaimer(){
+  disclaimerOverlay.hidden = true;
+  disclaimerBtn.focus();
+}
+disclaimerBtn.addEventListener("click", openDisclaimer);
+disclaimerClose.addEventListener("click", closeDisclaimer);
+disclaimerOverlay.addEventListener("click", (e) => {
+  if(e.target === disclaimerOverlay) closeDisclaimer();
+});
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape" && !disclaimerOverlay.hidden) closeDisclaimer();
+});
 
 /* ---------- PWA service worker registration ---------- */
 if("serviceWorker" in navigator){
