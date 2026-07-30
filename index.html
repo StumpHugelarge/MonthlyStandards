@@ -531,19 +531,21 @@ function render(){
   const autoHours = autoDaysWorked(year, monthIndex, holidays, adjWorkingDays);
   const daysWorkedHoursInput = document.getElementById("daysWorkedHours");
   if(!state.overrideHours){
-    daysWorkedHoursInput.value = Math.min(autoHours, adjWorkingDays);
-    state.daysWorkedHours = Number(daysWorkedHoursInput.value);
+    const autoValHours = Math.min(autoHours, adjWorkingDays);
+    state.daysWorkedHours = autoValHours;
+    if(document.activeElement !== daysWorkedHoursInput) daysWorkedHoursInput.value = autoValHours;
   } else {
-    daysWorkedHoursInput.value = state.daysWorkedHours;
+    if(document.activeElement !== daysWorkedHoursInput) daysWorkedHoursInput.value = state.daysWorkedHours;
   }
 
   // Days worked (rate card)
   const daysWorkedRateInput = document.getElementById("daysWorkedRate");
   if(!state.overrideRate){
-    daysWorkedRateInput.value = Math.min(autoHours, adjWorkingDays);
-    state.daysWorkedRate = Number(daysWorkedRateInput.value);
+    const autoValRate = Math.min(autoHours, adjWorkingDays);
+    state.daysWorkedRate = autoValRate;
+    if(document.activeElement !== daysWorkedRateInput) daysWorkedRateInput.value = autoValRate;
   } else {
-    daysWorkedRateInput.value = state.daysWorkedRate;
+    if(document.activeElement !== daysWorkedRateInput) daysWorkedRateInput.value = state.daysWorkedRate;
   }
 
   const avgHoursEl = document.getElementById("avgHours");
