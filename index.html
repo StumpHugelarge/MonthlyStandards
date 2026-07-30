@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monthly Standards Calculator</title>
+<meta name="theme-color" content="#4f46e5">
+<meta name="description" content="Calculates the required logged-in time and answer rate needed to hit your monthly goals.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg: #f4f5f9;
+    --card: #ffffff;
+    --border: #e6e8f0;
+    --text: #1a1d29;
+    --text-muted: #6b7185;
+    --accent: #4f46e5;
+    --accent-soft: #eef0fe;
+    --red-bg: #fdeceb;
+    --red-text: #c0392b;
+    --red-border: #f3c6c1;
+    --green-bg: #e9f7ef;
+    --green-text: #1e8449;
+    --green-border: #bfe6cd;
+    --gray-bg: #f1f2f5;
+    --gray-text: #6b7185;
+    --gray-border: #dcdfe6;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(20,20,43,0.04), 0 8px 24px rgba(20,20,43,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    padding: 24px 16px 48px;
+  }
+  .wrap{
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  header.app-header{
+    text-align:center;
+    margin-bottom: 28px;
+  }
+  header.app-header h1{
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  header.app-header p{
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  .controls{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .field label{
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  select, input[type="number"], input[type="time"]{
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fbfbfd;
+    color: var(--text);
+    min-width: 110px;
+  }
+  select:focus, input:focus{
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background: #fbfbfd;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .stepper button{
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .stepper button:disabled{
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .stepper span{
+    min-width: 28px;
+    text-align:center;
+    font-weight:700;
+    font-size: 0.95rem;
+  }
+  .summary-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 10px 24px;
+    background: var(--accent-soft);
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+    color: #3730a3;
+  }
+  .summary-bar b{ font-weight: 700; }
+  .cards{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 720px){
+    .cards{ grid-template-columns: 1fr; }
+  }
+  .card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px;
+    display:flex;
+    flex-direction:column;
+    gap: 16px;
+  }
+  .card h2{
+    font-size: 1.05rem;
+    margin: 0;
+    font-weight: 700;
+  }
+  .card .goal-tag{
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: -10px;
+  }
+  .row2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .result{
+    border-radius: 14px;
+    padding: 18px;
+    text-align:center;
+    border: 1px solid var(--border);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .result.red{ background: var(--red-bg); border-color: var(--red-border); }
+  .result.green{ background: var(--green-bg); border-color: var(--green-border); }
+  .result.gray{ background: var(--gray-bg); border-color: var(--gray-border); }
+  .result .big{
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .result.red .big{ color: var(--red-text); }
+  .result.green .big{ color: var(--green-text); }
+  .result.gray .big{ color: var(--gray-text); }
+  .result .sub{
+    font-size: 0.8rem;
+    margin-top: 4px;
+    color: var(--text-muted);
+  }
+  .result .status{
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 6px;
+  }
+  .result.red .status{ color: var(--red-text); }
+  .result.green .status{ color: var(--green-text); }
+  .result.gray .status{ color: var(--gray-text); }
+  .detail-line{
+    display:flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .detail-line b{ color: var(--text); font-weight: 600; }
+  footer{
+    text-align:center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 32px;
+  }
+  a.install-hint{ color: var(--accent); text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app-header">
+    <h1>Monthly Standards Calculator</h1>
+    <p>Enter your progress — the app works out what you need for the rest of the month.</p>
+  </header>
+
+  <div class="controls">
+    <div class="field">
+      <label for="month">Month</label>
+      <select id="month"></select>
+    </div>
+    <div class="field">
+      <label for="year">Year</label>
+      <select id="year"></select>
+    </div>
+    <div class="field">
+      <label>Vacation Days</label>
+      <div class="stepper">
+        <button id="vacDown" type="button" aria-label="Decrease vacation days">–</button>
+        <span id="vacVal">0</span>
+        <button id="vacUp" type="button" aria-label="Increase vacation days">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <div class="cards">
+    <div class="card">
+      <h2>Logged-In Time</h2>
+      <div class="goal-tag">Goal: 5.5 hrs/day average</div>
+      <div class="row2">
+        <div class="field">
+          <label for="daysWorkedHours">Days Worked</label>
+          <input type="number" id="daysWorkedHours" min="0" step="0.5">
+        </div>
+        <div class="field">
+          <label for="avgTime">Current Avg Time</label>
+          <input type="time" id="avgTime" step="60">
+        </div>
+      </div>
+      <div class="result gray" id="hoursResult">
+        <div class="big" id="hoursBig">–</div>
+        <div class="sub" id="hoursSub"></div>
+        <div class="status" id="hoursStatus"></div>
+      </div>
+      <div class="detail-line"><span>Working days (adj.)</span><b id="hoursWorkingDays">–</b></div>
+      <div class="detail-line"><span>Days remaining</span><b id="hoursDaysRemaining">–</b></div>
+    </div>
+
+    <div class="card">
+      <h2>Answer Rate</h2>
+      <div class="goal-tag">Goal: 85% average</div>
+      <div class="row2">
+        <div class="field">
+          <label for="daysWorkedRate">Days Worked</label>
+          <input type="number" id="daysWorkedRate" min="0" step="0.5">
+        </div>
+        <div class="field">
+          <label for="avgRate">Current Avg Rate (%)</label>
+          <input type="number" id="avgRate" min="0" max="100" step="0.01">
+        </div>
+      </div>
+      <div class="result gray" id="rateResult">
+        <div class="big" id="rateBig">–</div>
+        <div class="sub" id="rateSub"></div>
+        <div class="status" id="rateStatus"></div>
+      </div>
+      <div class="detail-line"><span>Working days (adj.)</span><b id="rateWorkingDays">–</b></div>
+      <div class="detail-line"><span>Days remaining</span><b id="rateDaysRemaining">–</b></div>
+    </div>
+  </div>
+
+  <footer>
+    Holidays observed: New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas Day (weekdays only — no weekend shifting).
+  </footer>
+</div>
+
+<script>
+/* ---------- Constants ---------- */
+const HOURS_GOAL = 5.5;      // hrs/day
+const RATE_GOAL = 0.85;      // 85%
+const STORAGE_KEY = "msc-state-v1";
+
+/* ---------- Holiday calculation ---------- */
+function lastWeekdayOfMonth(year, monthIndex, weekday){
+  let d = new Date(year, monthIndex + 1, 0); // last day of month
+  while(d.getDay() !== weekday) d.setDate(d.getDate() - 1);
+  return d;
+}
+function nthWeekdayOfMonth(year, monthIndex, weekday, n){
+  let d = new Date(year, monthIndex, 1);
+  let count = 0;
+  while(true){
+    if(d.getDay() === weekday){
+      count++;
+      if(count === n) return new Date(d);
+    }
+    d.setDate(d.getDate() + 1);
+  }
+}
+// Returns the list of observed-if-weekday holidays for a given year.
+// Per spec: if a fixed-date holiday falls on a weekend, it is simply NOT counted
+// that year (no shift to an adjacent weekday).
+function getHolidays(year){
+  return [
+    { name: "New Year's Day", date: new Date(year, 0, 1) },
+    { name: "Memorial Day", date: lastWeekdayOfMonth(year, 4, 1) },      // last Monday of May
+    { name: "Independence Day", date: new Date(year, 6, 4) },
+    { name: "Labor Day", date: nthWeekdayOfMonth(year, 8, 1, 1) },       // 1st Monday of Sept
+    { name: "Thanksgiving", date: nthWeekdayOfMonth(year, 10, 4, 4) },   // 4th Thursday of Nov
+    { name: "Christmas Day", date: new Date(year, 11, 25) },
+  ].filter(h => h.date.getDay() !== 0 && h.date.getDay() !== 6); // drop weekend-falling holidays entirely
+}
+
+function isWeekday(d){
+  const day = d.getDay();
+  return day !== 0 && day !== 6;
+}
+
+// Counts Mon-Fri days between start and end (inclusive), minus any weekday-holidays in range.
+function networkDays(start, end, holidays){
+  if(end < start) return 0;
+  let count = 0;
+  let d = new Date(start);
+  const holidaySet = new Set(holidays.map(h => h.date.toDateString()));
+  while(d <= end){
+    if(isWeekday(d) && !holidaySet.has(d.toDateString())) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
+
+function monthBounds(year, monthIndex){
+  const start = new Date(year, monthIndex, 1);
+  const end = new Date(year, monthIndex + 1, 0);
+  return { start, end };
+}
+
+/* ---------- Core required-average formula ---------- */
+// required = (goal*totalDays - currentAvg*daysWorked) / (totalDays - daysWorked)
+function requiredAverage(goal, totalDays, currentAvg, daysWorked){
+  const remaining = totalDays - daysWorked;
+  if(remaining <= 0 || totalDays <= 0){
+    return { ok: false };
+  }
+  const value = (goal * totalDays - currentAvg * daysWorked) / remaining;
+  return { ok: true, value, remaining };
+}
+
+/* ---------- UI setup ---------- */
+const monthSelect = document.getElementById("month");
+const yearSelect = document.getElementById("year");
+const vacVal = document.getElementById("vacVal");
+const vacUp = document.getElementById("vacUp");
+const vacDown = document.getElementById("vacDown");
+
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+MONTH_NAMES.forEach((m, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = m;
+  monthSelect.appendChild(opt);
+});
+
+const today = new Date();
+const thisYear = today.getFullYear();
+for(let y = thisYear - 2; y <= thisYear + 5; y++){
+  const opt = document.createElement("option");
+  opt.value = y;
+  opt.textContent = y;
+  yearSelect.appendChild(opt);
+}
+
+let state = {
+  month: today.getMonth(),
+  year: thisYear,
+  vacationDays: 0,
+  daysWorkedHours: null,   // null = "auto" not yet overridden
+  daysWorkedRate: null,
+  avgTime: "",
+  avgRate: "",
+  overrideHours: false,
+  overrideRate: false,
+};
+
+function loadState(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(saved) state = Object.assign(state, saved);
+  }catch(e){ /* ignore */ }
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function autoDaysWorked(year, monthIndex, holidays, totalWorkingDays){
+  const { start, end } = monthBounds(year, monthIndex);
+  const isCurrentMonth = (year === today.getFullYear() && monthIndex === today.getMonth());
+  if(isCurrentMonth){
+    const cappedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if(cappedToday < start) return 0;
+    const elapsedEnd = cappedToday > end ? end : cappedToday;
+    return networkDays(start, elapsedEnd, holidays);
+  } else if(new Date(year, monthIndex, 1) < new Date(today.getFullYear(), today.getMonth(), 1)){
+    // past month: fully elapsed
+    return totalWorkingDays;
+  } else {
+    // future month
+    return 0;
+  }
+}
+
+function timeStringToDecimal(t){
+  if(!t) return 0;
+  const [h, m] = t.split(":").map(Number);
+  return h + (m || 0) / 60;
+}
+function decimalToTimeString(hrsDecimal){
+  if(!isFinite(hrsDecimal) || hrsDecimal < 0) hrsDecimal = 0;
+  const totalMinutes = Math.round(hrsDecimal * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${h}:${String(m).padStart(2,"0")}`;
+}
+
+function setResult(cardPrefix, resultData, goal, unitFormatter, statusHigherIsHarder){
+  const resultEl = document.getElementById(cardPrefix + "Result");
+  const bigEl = document.getElementById(cardPrefix + "Big");
+  const subEl = document.getElementById(cardPrefix + "Sub");
+  const statusEl = document.getElementById(cardPrefix + "Status");
+
+  resultEl.classList.remove("red","green","gray");
+
+  if(!resultData.ok){
+    resultEl.classList.add("gray");
+    bigEl.textContent = "—";
+    subEl.textContent = "No days remaining this month";
+    statusEl.textContent = "";
+    return;
+  }
+
+  bigEl.textContent = unitFormatter(resultData.value);
+  subEl.textContent = `Required average for the remaining ${resultData.remaining} working day${resultData.remaining === 1 ? "" : "s"}`;
+
+  // harder-than-goal => red, easier-than-goal => green
+  const harder = resultData.value > goal + 1e-9;
+  const easier = resultData.value < goal - 1e-9;
+  if(harder){
+    resultEl.classList.add("red");
+    statusEl.textContent = "Above goal — behind pace";
+  } else if(easier){
+    resultEl.classList.add("green");
+    statusEl.textContent = "Below goal — ahead of pace";
+  } else {
+    resultEl.classList.add("green");
+    statusEl.textContent = "On goal";
+  }
+}
+
+function render(){
+  monthSelect.value = state.month;
+  yearSelect.value = state.year;
+  vacVal.textContent = state.vacationDays;
+  vacDown.disabled = state.vacationDays <= 0;
+  vacUp.disabled = state.vacationDays >= 10;
+
+  const year = Number(state.year);
+  const monthIndex = Number(state.month);
+  const { start, end } = monthBounds(year, monthIndex);
+  const holidays = getHolidays(year).filter(h => h.date >= start && h.date <= end);
+
+  const rawWorkingDays = networkDays(start, end, holidays);
+  const adjWorkingDays = Math.max(0, rawWorkingDays - state.vacationDays);
+
+  // Days worked (hours card)
+  const autoHours = autoDaysWorked(year, monthIndex, holidays, adjWorkingDays);
+  const daysWorkedHoursInput = document.getElementById("daysWorkedHours");
+  if(!state.overrideHours){
+    daysWorkedHoursInput.value = Math.min(autoHours, adjWorkingDays);
+    state.daysWorkedHours = Number(daysWorkedHoursInput.value);
+  } else {
+    daysWorkedHoursInput.value = state.daysWorkedHours;
+  }
+
+  // Days worked (rate card)
+  const daysWorkedRateInput = document.getElementById("daysWorkedRate");
+  if(!state.overrideRate){
+    daysWorkedRateInput.value = Math.min(autoHours, adjWorkingDays);
+    state.daysWorkedRate = Number(daysWorkedRateInput.value);
+  } else {
+    daysWorkedRateInput.value = state.daysWorkedRate;
+  }
+
+  document.getElementById("avgTime").value = state.avgTime || "";
+  document.getElementById("avgRate").value = state.avgRate || "";
+
+  const summaryBar = document.getElementById("summaryBar");
+  const holidayNames = holidays.map(h => h.name).join(", ") || "none";
+  summaryBar.innerHTML = `
+    <span><b>${MONTH_NAMES[monthIndex]} ${year}</b></span>
+    <span>Weekdays: <b>${rawWorkingDays + holidays.length}</b> total weekdays, minus <b>${holidays.length}</b> holiday(s)</span>
+    <span>Holidays counted: <b>${holidayNames}</b></span>
+    <span>Working days after vacation: <b>${adjWorkingDays}</b></span>
+  `;
+
+  document.getElementById("hoursWorkingDays").textContent = adjWorkingDays;
+  document.getElementById("rateWorkingDays").textContent = adjWorkingDays;
+
+  const currentAvgHours = timeStringToDecimal(state.avgTime);
+  const hoursResult = requiredAverage(HOURS_GOAL, adjWorkingDays, currentAvgHours, Number(state.daysWorkedHours) || 0);
+  document.getElementById("hoursDaysRemaining").textContent = hoursResult.ok ? hoursResult.remaining : 0;
+  setResult("hours", hoursResult, HOURS_GOAL, v => `${decimalToTimeString(v)} (${v.toFixed(2)} hrs)`);
+
+  const currentAvgRate = (Number(state.avgRate) || 0) / 100;
+  const rateResult = requiredAverage(RATE_GOAL, adjWorkingDays, currentAvgRate, Number(state.daysWorkedRate) || 0);
+  document.getElementById("rateDaysRemaining").textContent = rateResult.ok ? rateResult.remaining : 0;
+  setResult("rate", rateResult, RATE_GOAL, v => `${(v * 100).toFixed(2)}%`);
+
+  saveState();
+}
+
+/* ---------- Event wiring ---------- */
+monthSelect.addEventListener("change", () => {
+  state.month = Number(monthSelect.value);
+  state.overrideHours = false;
+  state.overrideRate = false;
+  render();
+});
+yearSelect.addEventListener("change", () => {
+  state.year = Number(yearSelect.value);
+  state.overrideHours = false;
+  state.overrideRate = false;
+  render();
+});
+vacUp.addEventListener("click", () => {
+  state.vacationDays = Math.min(10, state.vacationDays + 1);
+  render();
+});
+vacDown.addEventListener("click", () => {
+  state.vacationDays = Math.max(0, state.vacationDays - 1);
+  render();
+});
+document.getElementById("daysWorkedHours").addEventListener("input", (e) => {
+  state.overrideHours = true;
+  state.daysWorkedHours = Number(e.target.value) || 0;
+  render();
+});
+document.getElementById("daysWorkedRate").addEventListener("input", (e) => {
+  state.overrideRate = true;
+  state.daysWorkedRate = Number(e.target.value) || 0;
+  render();
+});
+document.getElementById("avgTime").addEventListener("input", (e) => {
+  state.avgTime = e.target.value;
+  render();
+});
+document.getElementById("avgRate").addEventListener("input", (e) => {
+  state.avgRate = e.target.value;
+  render();
+});
+
+loadState();
+render();
+
+/* ---------- PWA service worker registration ---------- */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {/* ignore */});
+  });
+}
+</script>
+</body>
+</html>
