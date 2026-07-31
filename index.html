@@ -643,10 +643,10 @@ function setResult(cardPrefix, resultData, goal, unitFormatter, statusHigherIsHa
   const easier = resultData.value < goal - 1e-9;
   if(harder){
     resultEl.classList.add("red");
-    statusEl.textContent = "Above goal — behind pace";
+    statusEl.textContent = "Below goal — behind pace";
   } else if(easier){
     resultEl.classList.add("green");
-    statusEl.textContent = "Below goal — ahead of pace";
+    statusEl.textContent = "Above goal — ahead of pace";
   } else {
     resultEl.classList.add("green");
     statusEl.textContent = "On goal";
