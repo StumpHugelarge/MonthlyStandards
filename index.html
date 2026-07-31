@@ -379,7 +379,7 @@
 <div class="wrap">
   <header class="app-header">
     <h1>Monthly Standards Calculator</h1>
-    <p>Enter your progress — the app works out what you need to hit minimum monthly standards.</p>
+    <p>"What do you think of a person who only does the bare minimum?"</p>
   </header>
 
   <div class="controls">
@@ -398,13 +398,12 @@
         <input type="number" id="vacVal" min="0" max="10" step="0.5" value="0" inputmode="decimal">
         <button id="vacUp" type="button" aria-label="Increase vacation days by 1">+</button>
       </div>
-      <div class="hint">± buttons step by 1 day; type directly for half days (e.g. 1.5)</div>
+      <div class="hint">± Buttons Step By 1 Day; Use the Arrows for Half Days</div>
     </div>
     <div class="field">
       <label for="daysWorked">Days Worked</label>
       <input type="number" id="daysWorked" min="0" step="0.5" inputmode="decimal">
-      <div class="hint">Shared by both cards below</div>
-    </div>
+      </div>
   </div>
 
   <div class="summary-bar" id="summaryBar"></div>
@@ -428,7 +427,7 @@
         <div class="status" id="hoursStatus"></div>
       </div>
       <div class="detail-line"><span>Working days (adj.)</span><b id="hoursWorkingDays">–</b></div>
-      <div class="detail-line"><span>Days remaining</span><b id="hoursDaysRemaining">–</b></div>
+      <div class="detail-line"><span>Days Remaining</span><b id="hoursDaysRemaining">–</b></div>
     </div>
 
     <div class="card">
@@ -444,12 +443,12 @@
         <div class="status" id="rateStatus"></div>
       </div>
       <div class="detail-line"><span>Working days (adj.)</span><b id="rateWorkingDays">–</b></div>
-      <div class="detail-line"><span>Days remaining</span><b id="rateDaysRemaining">–</b></div>
+      <div class="detail-line"><span>Days Remaining</span><b id="rateDaysRemaining">–</b></div>
     </div>
   </div>
 
   <footer>
-    Holidays observed: New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas Day (weekdays only — no weekend shifting).
+    Holidays Observed: New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving, Christmas Day (weekdays only — no weekend shifting).
     <div class="disclaimer-row">
       <button id="disclaimerBtn" class="disclaimer-btn" type="button">Disclaimer</button>
     </div>
@@ -690,9 +689,9 @@ function render(){
   const holidayNames = holidays.map(h => h.name).join(", ") || "none";
   summaryBar.innerHTML = `
     <span><b>${MONTH_NAMES[monthIndex]} ${year}</b></span>
-    <span>Weekdays: <b>${rawWorkingDays + holidays.length}</b> total weekdays, minus <b>${holidays.length}</b> holiday(s)</span>
-    <span>Holidays counted: <b>${holidayNames}</b></span>
-    <span>Working days after vacation: <b>${adjWorkingDays}</b></span>
+    <span>Weekdays: <b>${rawWorkingDays + holidays.length}</b> Total Weekdays, Minus <b>${holidays.length}</b> Holiday(s)</span>
+    <span>Holidays Counted: <b>${holidayNames}</b></span>
+    <span>Working Days After Vacation: <b>${adjWorkingDays}</b></span>
   `;
 
   document.getElementById("hoursWorkingDays").textContent = adjWorkingDays;
