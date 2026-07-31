@@ -1,10 +1,11 @@
-const CACHE_NAME = "msc-cache-v4";
+const CACHE_NAME = "msc-cache-v5";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./easter-egg.mp4"
 ];
 
 self.addEventListener("install", (event) => {
